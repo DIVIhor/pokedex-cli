@@ -1,2 +1,4 @@
-go.mod
 *.log
+*.exe
+builds/
+tmp/
