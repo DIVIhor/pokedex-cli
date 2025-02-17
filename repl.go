@@ -5,14 +5,23 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/DIVIgor/pokedex-cli/internal/pokeAPI"
 )
 
 // cli command template
 type cliCommand struct {
 	name string
 	description string
-	callback func() error
+	callback func(*apiConfig) error
 }
+
+type apiConfig struct {
+    client pokeAPI.Client
+    next string
+    previous string
+}
+
 
 // cli commands registry
 func getCommands() map[string]cliCommand {
@@ -26,6 +35,16 @@ func getCommands() map[string]cliCommand {
 			name: "help",
 			description: "Displays a help message",
 			callback: usageHelp,
+		},
+		"map": {
+			name: "map",
+			description: "Displays the next 20 locations on the map",
+			callback: mapNext,
+		},
+		"mapb": {
+			name: "mapb",
+			description: "Displays the previous 20 locations on the map",
+			callback: mapPrev,
 		},
 	}
 }
@@ -41,7 +60,7 @@ func cleanInput(text string) (cleanedInput []string) {
 	return cleanedInput
 }
 
-func startRepl() {
+func startRepl(cfg *apiConfig) {
 	cliCommands := getCommands()
 	// wait for user input
 	input := bufio.NewScanner(os.Stdin)
@@ -60,7 +79,7 @@ func startRepl() {
 			fmt.Println("Unknown command")
 			continue
 		}
-		err := command.callback()
+		err := command.callback(cfg)
 		if err != nil {
 			fmt.Println(err)
 		}
