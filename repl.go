@@ -73,6 +73,7 @@ func startRepl(cfg *apiConfig) {
 
 		inputStr := input.Text()
 		words := cleanInput(inputStr)
+		if len(words) == 0 {continue}
 
 		command, exists := cliCommands[words[0]]
 		if !exists {

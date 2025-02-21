@@ -30,10 +30,15 @@ func usageHelp(api *apiConfig) error {
 	return nil
 }
 
-// get and print locations for new location chunk
-func locationProcessor(url string, api *apiConfig) (err error) {
-	location, err := pokeAPI.GetLocations(url)
-    if err != nil {return}
+// get and print locations for a new/cached map chunk
+func requestProcessor(url string, api *apiConfig) (err error) {
+	data, err := api.client.GetLocations(url)
+	if err != nil {return}
+
+	location, err := pokeAPI.ReadJson(data)
+	if err != nil {
+		return err
+	}
 
     api.next = location.Next
     api.previous = location.Previous
@@ -51,7 +56,7 @@ func mapNext(api *apiConfig) (err error) {
         url = "https://pokeapi.co/api/v2/location-area/"
     }
     
-	err = locationProcessor(url, api)
+	err = requestProcessor(url, api)
 
 	return
 }
@@ -64,7 +69,7 @@ func mapPrev(api *apiConfig) (err error) {
 		return
 	}
 
-	err = locationProcessor(url, api)
+	err = requestProcessor(url, api)
 	
 	return
 }

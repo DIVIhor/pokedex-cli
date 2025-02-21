@@ -1,44 +1,35 @@
 package pokeAPI
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/DIVIgor/pokedex-cli/internal/pokecache"
 )
 
-// map locations responce structure
-type locationResponse struct {
-	Count int `json:"count"`
-	Next string `json:"next"`
-	Previous string `json:"previous"`
-	Results []struct {
-		Name string `json:"name"`
-		URL string `json:"url"`
-	} `json:"results"`
-}
 
 type Client struct {
+    cache pokecache.Cache
     httpClient http.Client
 }
 
 
-func NewClient(timeout time.Duration) Client {
+func NewClient(timeout, cachingDuration time.Duration) Client {
     return Client{
+        cache: *pokecache.NewCache(cachingDuration),
         httpClient: http.Client{
             Timeout: timeout,
         },
     }
 }
 
-func getRequest(url string) (response []byte, err error) {
+func (c *Client) getRequest(url string) (response []byte, err error) {
     // prepare the request
     req, err := http.NewRequest("GET", url, nil)
     if err != nil {return}
 
-    // create a client and make the request
-    client := http.Client{}
-    resp, err := client.Do(req)
+    resp, err := c.httpClient.Do(req)
     if err != nil {return}
     defer resp.Body.Close()
 
@@ -48,10 +39,15 @@ func getRequest(url string) (response []byte, err error) {
     return
 }
 
-func GetLocations(url string) (loc locationResponse, err error) {
-    dataset, err := getRequest(url)
-    if err != nil {return}
+func (c *Client) GetLocations(url string) (dataset []byte, err error) {
+    dataset, cached := c.cache.Get(url)
+    if !cached {
+        dataset, err = c.getRequest(url)
+        if err != nil {
+            return
+        }
+        c.cache.Add(url, dataset)
+    }
 
-    err = json.Unmarshal(dataset, &loc)
     return
 }
