@@ -39,7 +39,7 @@ func (c *Client) getRequest(url string) (response []byte, err error) {
     return
 }
 
-func (c *Client) GetLocations(url string) (dataset []byte, err error) {
+func (c *Client) GetRawData(url string) (dataset []byte, err error) {
     dataset, cached := c.cache.Get(url)
     if !cached {
         dataset, err = c.getRequest(url)

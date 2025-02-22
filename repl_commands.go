@@ -1,14 +1,17 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
 	"github.com/DIVIgor/pokedex-cli/internal/pokeAPI"
 )
 
+const areaURL string = "https://pokeapi.co/api/v2/location-area/"
+
 // print the exit message and close the app
-func exitRepl(api *apiConfig) error {
+func exitRepl(api *apiConfig, locName string) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 
@@ -16,7 +19,7 @@ func exitRepl(api *apiConfig) error {
 }
 
 // show command usage info
-func usageHelp(api *apiConfig) error {
+func usageHelp(api *apiConfig, locName string) error {
 	var info string
 	prefix := "Welcome to the Pokedex!\nUsage:\n\n%s"
 	infoTemplate := "%s: %s\n"
@@ -27,15 +30,16 @@ func usageHelp(api *apiConfig) error {
 	}
 
 	fmt.Printf(prefix, info)
+
 	return nil
 }
 
 // get and print locations for a new/cached map chunk
-func requestProcessor(url string, api *apiConfig) (err error) {
-	data, err := api.client.GetLocations(url)
+func locationProcessor(url string, api *apiConfig) (err error) {
+	data, err := api.client.GetRawData(url)
 	if err != nil {return}
 
-	location, err := pokeAPI.ReadJson(data)
+	location, err := pokeAPI.ReadLocationResp(data)
 	if err != nil {
 		return err
 	}
@@ -46,30 +50,62 @@ func requestProcessor(url string, api *apiConfig) (err error) {
     for _, loc := range location.Results {
         fmt.Println(loc.Name)
     }
+
 	return
 }
 
 // get map for the next location with caching
-func mapNext(api *apiConfig) (err error) {
+func mapNext(api *apiConfig, locName string) (err error) {
 	url := api.next
     if len(url) == 0 {
-        url = "https://pokeapi.co/api/v2/location-area/"
+        url = areaURL //"https://pokeapi.co/api/v2/location-area/"
     }
-    
-	err = requestProcessor(url, api)
+
+	err = locationProcessor(url, api)
 
 	return
 }
 
 // get map for the previous location with caching
-func mapPrev(api *apiConfig) (err error) {
+func mapPrev(api *apiConfig, locName string) (err error) {
 	url := api.previous
 	if len(url) == 0 {
 		fmt.Println("you're on the first page")
 		return
 	}
 
-	err = requestProcessor(url, api)
-	
+	err = locationProcessor(url, api)
+
+	return
+}
+
+func locDetailsProcessor(url string, api *apiConfig) (err error) {
+	data, err := api.client.GetRawData(url)
+	if err != nil {return}
+
+	details, err := pokeAPI.ReadDetailsResp(data)
+	if err != nil {
+		return err
+	}
+
+	// since the location could be inputted as an id
+	// the location name should be printed from the parsed response
+	fmt.Printf("Exploring %s...\n", details.Name)
+
+	fmt.Println("Found Pokemon:")
+    for _, encounter := range details.PokemonEncounters {
+        fmt.Printf("  - %s\n", encounter.Pokemon.Name)
+    }
+
+	return
+}
+
+// explore the location for pokemon presence
+func explore(api *apiConfig, locName string) (err error) {
+	if len(locName) == 0 {return errors.New("the location cannot be empty")}
+
+	url := areaURL + locName
+	err = locDetailsProcessor(url, api)
+
 	return
 }
