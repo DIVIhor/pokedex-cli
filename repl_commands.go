@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
 
 	"github.com/DIVIgor/pokedex-cli/internal/pokeAPI"
@@ -107,5 +108,37 @@ func explore(api *apiConfig, locName string) (err error) {
 	url := areaURL + locName
 	err = locDetailsProcessor(url, api)
 
+	return
+}
+
+func pokemonProcessor(pokemonName string, api *apiConfig) (err error) {
+	url := fmt.Sprintf("https://pokeapi.co/api/v2/pokemon/%s/", pokemonName)
+	data, err := api.client.GetRawData(url)
+	if err != nil {return}
+
+	pokemon, err := pokeAPI.ReadPokemonResp(data)
+	if err != nil {return}
+
+	fmt.Printf("Throwing a Pokeball at %s...\n", pokemon.Name)
+
+	// determine a chance on catching the pokemon
+	minCatchChance := 0.8
+	chance := float64(rand.Intn(pokemon.BaseExperience)) / float64(pokemon.BaseExperience)
+	if chance < minCatchChance {
+		fmt.Printf("%s escaped!\n", pokemon.Name)
+		return
+	}
+	// in case of catching -> add it to the user's pokedex
+	fmt.Printf("%s was caught!\n", pokemon.Name)
+	api.caughtPokemons[pokemonName] = pokemon
+
+	return
+}
+
+// try to catch a pokemon
+func catch(api *apiConfig, pokemonName string) (err error) {
+	if len(pokemonName) == 0 {return errors.New("the Pokemon name cannot be empty")}
+
+	err = pokemonProcessor(pokemonName, api)
 	return
 }

@@ -20,6 +20,7 @@ type apiConfig struct {
     client pokeAPI.Client
     next string
     previous string
+	caughtPokemons map[string]pokeAPI.PokemonResponse
 }
 
 
@@ -50,6 +51,11 @@ func getCommands() map[string]cliCommand {
 			name: "explore <location_name>",
 			description: "Displays all the pokemons located in the provided area",
 			callback: explore,
+		},
+		"catch": {
+			name: "catch <pokemon_name>",
+			description: "Attempt to catch a pokemon",
+			callback: catch,
 		},
 	}
 }

@@ -11,6 +11,7 @@ func main() {
 	pokeClient := pokeAPI.NewClient(5 * time.Second, 5 * time.Minute)
 	apiCfg := &apiConfig{
 		client: pokeClient,
+		caughtPokemons: map[string]pokeAPI.PokemonResponse{},
 	}
 
 	startRepl(apiCfg)
