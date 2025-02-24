@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 
 	"github.com/DIVIgor/pokedex-cli/internal/pokeAPI"
 )
@@ -140,5 +141,30 @@ func catch(api *apiConfig, pokemonName string) (err error) {
 	if len(pokemonName) == 0 {return errors.New("the Pokemon name cannot be empty")}
 
 	err = pokemonProcessor(pokemonName, api)
+	return
+}
+
+// inspect a caught pokemon
+func inspect(api *apiConfig, pokemonName string) (err error) {
+	if len(pokemonName) == 0 {return errors.New("the Pokemon name cannot be empty")}
+
+	pokemon, exists := api.caughtPokemons[strings.ToLower(pokemonName)]
+	if !exists {
+		return fmt.Errorf("you haven't caught %s", pokemonName)
+	}
+
+	fmt.Printf(
+`Name: %s
+Height: %d
+Weight: %d
+Stats:`, pokemon.Name, pokemon.Height, pokemon.Weight)
+	for _, stat := range pokemon.Stats {
+		fmt.Printf("  - %s: %d\n", stat.Stat.Name, stat.BaseStat)
+	}
+	fmt.Println("Types:")
+	for _, pType := range pokemon.Types {
+		fmt.Println("  -", pType.Type.Name)
+	}
+	
 	return
 }

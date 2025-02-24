@@ -323,10 +323,10 @@ type PokemonResponse struct {
 	} `json:"sprites"`
 	Stats []struct {
 		BaseStat int `json:"base_stat"`
-		Effort   int `json:"effort"`
-		Stat     struct {
+		Effort int `json:"effort"`
+		Stat struct {
 			Name string `json:"name"`
-			URL  string `json:"url"`
+			URL string `json:"url"`
 		} `json:"stat"`
 	} `json:"stats"`
 	Types []struct {
