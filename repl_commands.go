@@ -131,7 +131,8 @@ func pokemonProcessor(pokemonName string, api *apiConfig) (err error) {
 	}
 	// in case of catching -> add it to the user's pokedex
 	fmt.Printf("%s was caught!\n", pokemon.Name)
-	api.caughtPokemons[pokemonName] = pokemon
+	api.caughtPokemon[pokemonName] = pokemon
+	fmt.Println("You may now inspect it with the 'inspect' command.")
 
 	return
 }
@@ -148,7 +149,7 @@ func catch(api *apiConfig, pokemonName string) (err error) {
 func inspect(api *apiConfig, pokemonName string) (err error) {
 	if len(pokemonName) == 0 {return errors.New("the Pokemon name cannot be empty")}
 
-	pokemon, exists := api.caughtPokemons[strings.ToLower(pokemonName)]
+	pokemon, exists := api.caughtPokemon[strings.ToLower(pokemonName)]
 	if !exists {
 		return fmt.Errorf("you haven't caught %s", pokemonName)
 	}
@@ -166,5 +167,17 @@ Stats:`, pokemon.Name, pokemon.Height, pokemon.Weight)
 		fmt.Println("  -", pType.Type.Name)
 	}
 	
+	return
+}
+
+// show all the caught pokemon
+func showPokedex(api *apiConfig, _ string) (err error) {
+	if len(api.caughtPokemon) == 0 {return errors.New("you have not caught any Pokemon")}
+
+	fmt.Println("Your Pokedex:")
+	for _, pokemon := range api.caughtPokemon {
+		fmt.Println("  -", pokemon.Name)
+	}
+
 	return
 }

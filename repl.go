@@ -20,7 +20,7 @@ type apiConfig struct {
     client pokeAPI.Client
     next string
     previous string
-	caughtPokemons map[string]pokeAPI.PokemonResponse
+	caughtPokemon map[string]pokeAPI.PokemonResponse
 }
 
 
@@ -61,6 +61,11 @@ func getCommands() map[string]cliCommand {
 			name: "inspect <pokemon_name>",
 			description: "Shows the name, height, weight, stats and type(s) of the Pokemon",
 			callback: inspect,
+		},
+		"pokedex": {
+			name: "pokedex",
+			description: "Shows all the Pokemon you caught",
+			callback: showPokedex,
 		},
 	}
 }
