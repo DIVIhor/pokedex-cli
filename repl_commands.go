@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/DIVIgor/pokedex-cli/internal/pokeAPI"
+	"github.com/DIVIhor/pokedex-cli/internal/pokeAPI"
 )
 
 const areaURL string = "https://pokeapi.co/api/v2/location-area/"
@@ -39,19 +39,21 @@ func usageHelp(api *apiConfig, locName string) error {
 // get and print locations for a new/cached map chunk
 func locationProcessor(url string, api *apiConfig) (err error) {
 	data, err := api.client.GetRawData(url)
-	if err != nil {return}
+	if err != nil {
+		return
+	}
 
 	location, err := pokeAPI.ReadLocationResp(data)
 	if err != nil {
 		return err
 	}
 
-    api.next = location.Next
-    api.previous = location.Previous
+	api.next = location.Next
+	api.previous = location.Previous
 
-    for _, loc := range location.Results {
-        fmt.Println(loc.Name)
-    }
+	for _, loc := range location.Results {
+		fmt.Println(loc.Name)
+	}
 
 	return
 }
@@ -59,9 +61,9 @@ func locationProcessor(url string, api *apiConfig) (err error) {
 // get map for the next location with caching
 func mapNext(api *apiConfig, locName string) (err error) {
 	url := api.next
-    if len(url) == 0 {
-        url = areaURL //"https://pokeapi.co/api/v2/location-area/"
-    }
+	if len(url) == 0 {
+		url = areaURL //"https://pokeapi.co/api/v2/location-area/"
+	}
 
 	err = locationProcessor(url, api)
 
@@ -83,7 +85,9 @@ func mapPrev(api *apiConfig, locName string) (err error) {
 
 func locDetailsProcessor(url string, api *apiConfig) (err error) {
 	data, err := api.client.GetRawData(url)
-	if err != nil {return}
+	if err != nil {
+		return
+	}
 
 	details, err := pokeAPI.ReadDetailsResp(data)
 	if err != nil {
@@ -95,16 +99,18 @@ func locDetailsProcessor(url string, api *apiConfig) (err error) {
 	fmt.Printf("Exploring %s...\n", details.Name)
 
 	fmt.Println("Found Pokemon:")
-    for _, encounter := range details.PokemonEncounters {
-        fmt.Printf("  - %s\n", encounter.Pokemon.Name)
-    }
+	for _, encounter := range details.PokemonEncounters {
+		fmt.Printf("  - %s\n", encounter.Pokemon.Name)
+	}
 
 	return
 }
 
 // explore the location for pokemon presence
 func explore(api *apiConfig, locName string) (err error) {
-	if len(locName) == 0 {return errors.New("the location cannot be empty")}
+	if len(locName) == 0 {
+		return errors.New("the location cannot be empty")
+	}
 
 	url := areaURL + locName
 	err = locDetailsProcessor(url, api)
@@ -115,10 +121,14 @@ func explore(api *apiConfig, locName string) (err error) {
 func pokemonProcessor(pokemonName string, api *apiConfig) (err error) {
 	url := fmt.Sprintf("https://pokeapi.co/api/v2/pokemon/%s/", pokemonName)
 	data, err := api.client.GetRawData(url)
-	if err != nil {return}
+	if err != nil {
+		return
+	}
 
 	pokemon, err := pokeAPI.ReadPokemonResp(data)
-	if err != nil {return}
+	if err != nil {
+		return
+	}
 
 	fmt.Printf("Throwing a Pokeball at %s...\n", pokemon.Name)
 
@@ -139,7 +149,9 @@ func pokemonProcessor(pokemonName string, api *apiConfig) (err error) {
 
 // try to catch a pokemon
 func catch(api *apiConfig, pokemonName string) (err error) {
-	if len(pokemonName) == 0 {return errors.New("the Pokemon name cannot be empty")}
+	if len(pokemonName) == 0 {
+		return errors.New("the Pokemon name cannot be empty")
+	}
 
 	err = pokemonProcessor(pokemonName, api)
 	return
@@ -147,7 +159,9 @@ func catch(api *apiConfig, pokemonName string) (err error) {
 
 // inspect a caught pokemon
 func inspect(api *apiConfig, pokemonName string) (err error) {
-	if len(pokemonName) == 0 {return errors.New("the Pokemon name cannot be empty")}
+	if len(pokemonName) == 0 {
+		return errors.New("the Pokemon name cannot be empty")
+	}
 
 	pokemon, exists := api.caughtPokemon[strings.ToLower(pokemonName)]
 	if !exists {
@@ -155,7 +169,7 @@ func inspect(api *apiConfig, pokemonName string) (err error) {
 	}
 
 	fmt.Printf(
-`Name: %s
+		`Name: %s
 Height: %d
 Weight: %d
 Stats:`, pokemon.Name, pokemon.Height, pokemon.Weight)
@@ -166,13 +180,15 @@ Stats:`, pokemon.Name, pokemon.Height, pokemon.Weight)
 	for _, pType := range pokemon.Types {
 		fmt.Println("  -", pType.Type.Name)
 	}
-	
+
 	return
 }
 
 // show all the caught pokemon
 func showPokedex(api *apiConfig, _ string) (err error) {
-	if len(api.caughtPokemon) == 0 {return errors.New("you have not caught any Pokemon")}
+	if len(api.caughtPokemon) == 0 {
+		return errors.New("you have not caught any Pokemon")
+	}
 
 	fmt.Println("Your Pokedex:")
 	for _, pokemon := range api.caughtPokemon {

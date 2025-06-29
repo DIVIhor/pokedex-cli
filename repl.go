@@ -6,70 +6,68 @@ import (
 	"os"
 	"strings"
 
-	"github.com/DIVIgor/pokedex-cli/internal/pokeAPI"
+	"github.com/DIVIhor/pokedex-cli/internal/pokeAPI"
 )
 
 // cli command template
 type cliCommand struct {
-	name string
+	name        string
 	description string
-	callback func(*apiConfig, string) error
+	callback    func(*apiConfig, string) error
 }
 
 type apiConfig struct {
-    client pokeAPI.Client
-    next string
-    previous string
+	client        pokeAPI.Client
+	next          string
+	previous      string
 	caughtPokemon map[string]pokeAPI.PokemonResponse
 }
 
-
 // cli commands registry
 func getCommands() map[string]cliCommand {
-	return map[string]cliCommand {
+	return map[string]cliCommand{
 		"exit": {
-			name: "exit",
+			name:        "exit",
 			description: "Exit the Pokedex",
-			callback: exitRepl,
+			callback:    exitRepl,
 		},
 		"help": {
-			name: "help",
+			name:        "help",
 			description: "Displays a help message",
-			callback: usageHelp,
+			callback:    usageHelp,
 		},
 		"map": {
-			name: "map",
+			name:        "map",
 			description: "Displays the next 20 locations on the map",
-			callback: mapNext,
+			callback:    mapNext,
 		},
 		"mapb": {
-			name: "mapb",
+			name:        "mapb",
 			description: "Displays the previous 20 locations on the map",
-			callback: mapPrev,
+			callback:    mapPrev,
 		},
 		"explore": {
-			name: "explore <location_name>",
+			name:        "explore <location_name>",
 			description: "Displays all the pokemons located in the provided area",
-			callback: explore,
+			callback:    explore,
 		},
 		"catch": {
-			name: "catch <pokemon_name>",
+			name:        "catch <pokemon_name>",
 			description: "Attempt to catch a Pokemon",
-			callback: catch,
+			callback:    catch,
 		},
 		"inspect": {
-			name: "inspect <pokemon_name>",
+			name:        "inspect <pokemon_name>",
 			description: "Shows the name, height, weight, stats and type(s) of the Pokemon",
-			callback: inspect,
+			callback:    inspect,
 		},
 		"pokedex": {
-			name: "pokedex",
+			name:        "pokedex",
 			description: "Shows all the Pokemon you caught",
-			callback: showPokedex,
+			callback:    showPokedex,
 		},
 	}
 }
-
 
 // Clean an inputted string from spaces and split it to a slice of strings
 func cleanInput(text string) (cleanedInput []string) {
@@ -94,7 +92,9 @@ func startRepl(cfg *apiConfig) {
 
 		inputStr := input.Text()
 		words := cleanInput(inputStr)
-		if len(words) == 0 {continue}
+		if len(words) == 0 {
+			continue
+		}
 
 		command, exists := cliCommands[words[0]]
 		if !exists {
@@ -102,8 +102,10 @@ func startRepl(cfg *apiConfig) {
 			continue
 		}
 
-		loc := ""  // sublocation
-		if len(words) > 1 {loc = words[1]}
+		loc := "" // sublocation
+		if len(words) > 1 {
+			loc = words[1]
+		}
 		err := command.callback(cfg, loc)
 		if err != nil {
 			fmt.Println(err)

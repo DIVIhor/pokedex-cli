@@ -5,15 +5,14 @@ import (
 	"time"
 )
 
-
 type cacheEntry struct {
 	createdAt time.Time
-	val []byte
+	val       []byte
 }
 
 type Cache struct {
 	data map[string]cacheEntry
-	mu *sync.RWMutex
+	mu   *sync.RWMutex
 }
 
 func (c *Cache) Add(key string, val []byte) {
@@ -21,7 +20,7 @@ func (c *Cache) Add(key string, val []byte) {
 	defer c.mu.Unlock()
 	c.data[key] = cacheEntry{
 		createdAt: time.Now(),
-		val: val,
+		val:       val,
 	}
 }
 
@@ -57,13 +56,12 @@ func (c *Cache) reapLoop(interval time.Duration) {
 	}
 }
 
-
 func NewCache(interval time.Duration) *Cache {
 	// cache initialization
 	// if it's not initialized -> causes panic
 	cache := &Cache{
 		data: map[string]cacheEntry{},
-		mu: &sync.RWMutex{},
+		mu:   &sync.RWMutex{},
 	}
 	go cache.reapLoop(interval)
 
