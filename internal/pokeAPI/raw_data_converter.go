@@ -127,11 +127,21 @@ type PokemonResponse struct {
 			} `json:"version_group"`
 		} `json:"version_group_details"`
 	} `json:"moves"`
-	Name          string   `json:"name"`
-	Order         int      `json:"order"`
-	PastAbilities []string `json:"past_abilities"` // former `any`
-	PastTypes     []string `json:"past_types"`     // former `any
-	Species       struct {
+	Name          string `json:"name"`
+	Order         int    `json:"order"`
+	PastAbilities []struct {
+		Abilities []struct {
+			Ability  any  `json:"ability"`
+			IsHidden bool `json:"is_hidden"`
+			Slot     int  `json:"slot"`
+		} `json:"abilities"`
+		Generation struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"generation"`
+	} `json:"past_abilities"` // former `any`
+	PastTypes []string `json:"past_types"` // former `any
+	Species   struct {
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	} `json:"species"`
